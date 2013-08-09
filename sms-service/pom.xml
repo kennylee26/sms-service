@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>timekey</groupId>
+	<artifactId>sms-service</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<name>CXF JAX-RS webapp service using spring configuration for SMSlib</name>
+	<description>CXF JAX-RS webapp service using spring configuration for SMSlib</description>
+
+	<organization>
+		<name>广州天健软件有限公司</name>
+		<url>http://timekey.com.cn/</url>
+	</organization>
+
+	<properties>
+		<jackson.version>1.8.6</jackson.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.test.skip>false</maven.test.skip>
+		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<isObfuscate>true</isObfuscate>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+			<version>2.7.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-jaxrs</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>3.0.7.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>cn.com.timekey</groupId>
+			<artifactId>commons-core</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>JDSmsServer</groupId>
+			<artifactId>JDSmsServer</artifactId>
+			<version>3.4.6</version>
+		</dependency>
+		<dependency>
+			<groupId>RxTx</groupId>
+			<artifactId>RxTx</artifactId>
+			<version>2.1-7r2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.tomcat.maven</groupId>
+					<artifactId>tomcat7-maven-plugin</artifactId>
+					<version>2.0</version>
+					<executions>
+						<execution>
+							<id>default-cli</id>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<configuration>
+								<port>13000</port>
+								<path>/jaxrs-service</path>
+								<useSeparateTomcatClassLoader>true</useSeparateTomcatClassLoader>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-eclipse-plugin</artifactId>
+					<configuration>
+						<projectNameTemplate>[artifactId]-[version]</projectNameTemplate>
+						<wtpmanifest>true</wtpmanifest>
+						<wtpapplicationxml>true</wtpapplicationxml>
+						<wtpversion>2.0</wtpversion>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>reserve-network-port</id>
+						<goals>
+							<goal>reserve-network-port</goal>
+						</goals>
+						<phase>process-test-resources</phase>
+						<configuration>
+							<portNames>
+								<portName>test.server.port</portName>
+							</portNames>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>start-tomcat</id>
+						<goals>
+							<goal>run-war</goal>
+						</goals>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<port>${test.server.port}</port>
+							<path>/jaxrs-service</path>
+							<fork>true</fork>
+							<useSeparateTomcatClassLoader>true</useSeparateTomcatClassLoader>
+						</configuration>
+					</execution>
+					<execution>
+						<id>stop-tomcat</id>
+						<goals>
+							<goal>shutdown</goal>
+						</goals>
+						<phase>post-integration-test</phase>
+						<configuration>
+							<path>/jaxrs-service</path>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.8.1</version>
+				<executions>
+					<execution>
+						<id>integration-test</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+						<configuration>
+							<systemPropertyVariables>
+								<service.url>http://localhost:${test.server.port}/jaxrs-service</service.url>
+							</systemPropertyVariables>
+						</configuration>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+<!-- 			<plugin>
+				<groupId>com.github.wvengen</groupId>
+				<artifactId>proguard-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>proguard</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>net.sf.proguard</groupId>
+						<artifactId>proguard-base</artifactId>
+						<version>4.8</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<obfuscate>true</obfuscate>
+					<includeDependency>false</includeDependency>
+					<injar>${project.artifactId}-base.war</injar>
+					<outjar>${project.artifactId}.war</outjar>
+					<maxMemory>256m</maxMemory>
+					<options>
+						<option>-renamesourcefileattribute SourceFile</option>
+						<option>-allowaccessmodification</option>
+						<option>-keepdirectories</option>
+						<option>-dontoptimize</option>
+						<option>-overloadaggressively</option>
+						<option>-repackageclasses ''</option>
+						<option>-printseeds</option>
+						<option>-keep public class * { public protected
+							*; }</option>
+						<option><![CDATA[
+                        -keepclassmembers enum * {
+                            public static **[] values();
+                            public static ** valueOf(java.lang.String);
+                        }                       
+                        ]]></option>
+						<option><![CDATA[
+                        -keepclassmembers class * { 
+                            @org.springframework.beans.factory.annotation.Autowired *; 
+                            @org.springframework.beans.factory.annotation.Qualifier *; 
+                            @org.springframework.beans.factory.annotation.Value *; 
+                            @org.springframework.beans.factory.annotation.Required *;
+                            @org.springframework.context.annotation.Bean *;
+                            @javax.annotation.PostConstruct *;
+                            @javax.annotation.PreDestroy *;
+                            @org.aspectj.lang.annotation.AfterReturning *;
+                            @org.aspectj.lang.annotation.Pointcut *;
+                            @org.aspectj.lang.annotation.AfterThrowing *;
+                            @org.aspectj.lang.annotation.Around *;
+                        }
+                        ]]></option>
+						<option>-keepclassmembers class * implements java.io.Serializable
+							{ static final long serialVersionUID; private static final
+							java.io.ObjectStreamField[]
+							serialPersistentFields; private void
+							writeObject(java.io.ObjectOutputStream);
+							private void
+							readObject(java.io.ObjectInputStream); java.lang.Object
+							writeReplace();
+							java.lang.Object readResolve(); }
+						</option>
+						<option>-keepattributes
+							Exceptions,InnerClasses,Signature,Deprecated,
+							SourceFile,LineNumberTable,*Annotation*,EnclosingMethod</option>
+						<option>-keepclasseswithmembers public class * { public static
+							void main(java.lang.String[]);
+							}</option>
+						<option>-dontoptimize</option>
+						<option>-dontskipnonpubliclibraryclasses</option>
+						<option>-dontskipnonpubliclibraryclassmembers</option>
+						<option>-dontwarn javax.servlet.**</option>
+						<option>-dontwarn javax.crypto.**</option>
+						<option>-ignorewarnings</option>
+					</options>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+					<libs>
+						<lib>${java.home}/lib/rt.jar</lib>
+						<lib>${java.home}/lib/jsse.jar</lib>
+					</libs>
+					<addMavenDescriptor>false</addMavenDescriptor>
+					<proguardVersion>4.8</proguardVersion>
+				</configuration>
+			</plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>${maven.test.skip}</skip>
+					<testFailureIgnore>${maven.test.failure.ignore}</testFailureIgnore>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
