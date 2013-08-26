@@ -31,7 +31,7 @@ import org.junit.Test;
  */
 public class SendMessageTest {
 
-	private static String endpointUrl = "http://192.168.1.222:8080/sms-service/";
+	private static String endpointUrl = "http://127.0.0.1:8080/sms-service/";
 
 	@Test
 	public void testExecute() throws Exception {
@@ -42,6 +42,7 @@ public class SendMessageTest {
 		inputBean.setMessage("测试短信啊啊啊啊啊是的圣诞树 圣诞树的");
 		inputBean.setPhones(phones);
 		WebClient client = WebClient.create(endpointUrl + "/send", providers);
+		//WebClient.getConfig(client).getHttpConduit().getClient().setReceiveTimeout(1000);
 		Response r = client.accept("application/json").type("application/json")
 				.post(inputBean);
 		assertEquals(Response.Status.OK.getStatusCode(), r.getStatus());
